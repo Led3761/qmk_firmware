@@ -23,4 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SPLIT_USB_DETECT //Без этого не работает
 #define SPLIT_WATCHDOG_ENABLE
 
-#define COMBO_COUNT 3
+#define COMBO_COUNT 2
+
+#define RGBLIGHT_SLEEP
