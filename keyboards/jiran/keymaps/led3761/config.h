@@ -1,5 +1,5 @@
 /*
-Copyright 2020 Vladislav Morozov <ladniy1@ya.ru>
+Copyright 2017 Danny Nguyen <danny@keeb.io>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,4 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-// #define MASTER_LEFT
+#define USE_I2C
+#define EE_HANDS
+
+#define SPLIT_USB_DETECT //Без этого не работает
+#define SPLIT_WATCHDOG_ENABLE
+
+#define COMBO_COUNT 3
