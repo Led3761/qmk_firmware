@@ -1,5 +1,6 @@
 #include QMK_KEYBOARD_H
 #include <stdbool.h>
+#include "transactions.h"
 
 // Define colors for Layers
 #define NO_USB_CONNECTION_HSV_COLOR HSV_WHITE
@@ -31,7 +32,7 @@ enum my_keycodes {
 
 bool keyboard_usb_connected = false;
 // Remember backlight state before turn off on suspend
-bool backlight_suspend_state = true;
+bool backlight_suspend_state = false;
 // Set to true when suspend_power_down_user called first time
 // reset to false after wake up. Use for set backlight_suspend_state once
 bool power_down_flag = false;
@@ -41,7 +42,6 @@ uint8_t current_lag = LANG_ENG;
 bool disable_lang_switch = false;
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-
  [_ENG] = LAYOUT(
       KC_ESC,
       KC_7,
@@ -220,6 +220,32 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 };
 
+// Custom data sync between sides
+typedef struct _master_to_slave_t {
+  bool m2s_power_state;
+} master_to_slave_t;
+
+typedef struct _slave_to_master_t {
+  bool s2m_data_accepted;
+} slave_to_master_t;
+
+void power_state_sync_slave_handler(
+  uint8_t in_buflen, const void* in_data, 
+  uint8_t out_buflen, void* out_data) 
+{
+  const master_to_slave_t *m2s = (const master_to_slave_t*)in_data;
+  slave_to_master_t *s2m = (slave_to_master_t*)out_data;
+
+  if (m2s->m2s_power_state) {
+    rgblight_wakeup();
+  }
+  else {
+    rgblight_suspend();
+  }
+
+  s2m->s2m_data_accepted = true;
+}
+
 // Create combos
 const uint16_t PROGMEM hard_sign_combo [] = {KC_J, KC_M, COMBO_END};
 const uint16_t PROGMEM rus_yo_combo [] = {KC_T, KC_F, COMBO_END};
@@ -262,7 +288,8 @@ void lang_check_and_set(uint8_t p_set_layer) {
 }
 
 void keyboard_post_init_user(void) {
-  backlight_enable();
+  transaction_register_rpc(POWER_STATE_SYNC, power_state_sync_slave_handler);
+  rgblight_wakeup();
   rgblight_sethsv_noeeprom(NO_USB_CONNECTION_HSV_COLOR);
 }
 
@@ -276,8 +303,14 @@ void matrix_scan_user(void) {
 void suspend_power_down_user(void) {
   // Code will run multiple times while keyboard is suspended
   if (!power_down_flag) {
-    rgblight_suspend();
+    if (is_keyboard_master()) {
+      master_to_slave_t m2s = {false};
+      slave_to_master_t s2m = {false};
 
+      transaction_rpc_exec(POWER_STATE_SYNC, sizeof(m2s), &m2s, sizeof(s2m), &s2m);
+    }
+
+    rgblight_suspend();
     power_down_flag = true;
     backlight_suspend_state = is_backlight_enabled();
 
@@ -287,6 +320,13 @@ void suspend_power_down_user(void) {
 
 void suspend_wakeup_init_user(void) {
   // Code will run on keyboard wakeup
+  if (is_keyboard_master()) {
+    master_to_slave_t m2s = {true};
+    slave_to_master_t s2m = {false};
+    
+    transaction_rpc_exec(POWER_STATE_SYNC, sizeof(m2s), &m2s, sizeof(s2m), &s2m);
+  }
+
   if (backlight_suspend_state) {
     backlight_enable();
   }
