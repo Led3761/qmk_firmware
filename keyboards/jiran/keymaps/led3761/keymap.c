@@ -336,17 +336,25 @@ const key_override_t **key_overrides = (const key_override_t *[]){
 void lang_check_and_set(uint8_t p_set_layer) {
   if (disable_lang_switch) {
     disable_lang_switch = false;
+    return;
   }
-  else if ((p_set_layer == _RUS) && current_lag != LANG_RUS)
+
+  uint8_t mods = get_mods();
+
+  if ((p_set_layer == _RUS) && current_lag != LANG_RUS)
   {
     current_lag = LANG_RUS;
+    unregister_mods(mods);
     tap_code16(LANG_SWITCH);
+    register_mods(mods);
   }
   else if (((p_set_layer == _FN) && current_lag != LANG_ENG)
         || ((p_set_layer == _ENG) && current_lag != LANG_ENG))
   {
     current_lag = LANG_ENG;
+    unregister_mods(mods);
     tap_code16(LANG_SWITCH);
+    register_mods(mods);
   }
 }
 
