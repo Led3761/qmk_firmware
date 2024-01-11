@@ -7,6 +7,7 @@
 #define ENG_HSV_COLOR HSV_SPRINGGREEN
 #define RUS_HSV_COLOR HSV_GOLD
 #define FN_HSV_COLOR HSV_MAGENTA
+#define QWERTY_HSV_COLOR HSV_RED
 
 // Define language switch key combination
 #define LANG_SWITCH LWIN(KC_SPACE)
@@ -21,6 +22,7 @@ enum use_languages {
 enum jiran_layers {
   _ENG,
   _RUS,
+  _QWERTY,
   _FN
 };
 
@@ -97,7 +99,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       LT(0,KC_LSFT),
       KC_SPC,
       KC_BSPC,
-      MO(2),
+      MO(_FN),
       KC_ENT
     ), 
 
@@ -160,6 +162,65 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_TRNS
   ),
 
+  [_QWERTY] = LAYOUT(
+      KC_ESC,
+      KC_1,
+      KC_2,
+      KC_3,
+      KC_4,
+      KC_5,
+      KC_6,
+      KC_7,
+      KC_8,
+      KC_9,
+      KC_0,
+      KC_MINS,
+      TG(_QWERTY),
+      KC_TAB,
+      KC_Q,
+      KC_W,
+      KC_E,
+      KC_R,
+      KC_T,
+      KC_Y,
+      KC_U,
+      KC_I,
+      KC_O,
+      KC_P,
+      KC_LBRC,
+      KC_EQL,
+      KC_LSFT,
+      KC_A,
+      KC_S,
+      KC_D,
+      KC_F,
+      KC_G,
+      KC_H,
+      KC_J,
+      KC_K,
+      KC_L,
+      KC_SCLN,
+      KC_RBRC,
+      KC_LCTL,
+      KC_Z,
+      KC_X,
+      KC_C,
+      KC_V,
+      KC_B,
+      KC_N,
+      KC_M,
+      KC_COMM,
+      KC_DOT,
+      KC_SLSH,
+      KC_QUOT,
+      KC_LALT,
+      KC_SPC,
+      KC_LGUI,
+      KC_TRNS,
+      KC_TRNS,
+      KC_TRNS
+  ),
+
   [_FN] = LAYOUT(
       KC_GRV,
       KC_F7,
@@ -211,13 +272,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       LCTL(KC_RGHT),
       LCTL(KC_DOWN),
       (POINTER_ARROW),
-      KC_LGUI,
+      KC_TRNS,
       KC_TRNS,
       KC_TRNS,
       LCTL(KC_BSPC),
       KC_TRNS,
       LCTL(KC_ENT)
-  ),
+  )
 };
 
 // Custom data sync between sides
@@ -249,9 +310,11 @@ void power_state_sync_slave_handler(
 // Create combos
 const uint16_t PROGMEM hard_sign_combo [] = {KC_J, KC_M, COMBO_END};
 const uint16_t PROGMEM rus_yo_combo [] = {KC_T, KC_F, COMBO_END};
+const uint16_t PROGMEM qwerty_layer_combo [] = {KC_DEL, KC_G, COMBO_END};
 combo_t key_combos[COMBO_COUNT] = {
   COMBO(hard_sign_combo, KC_RIGHT_BRACKET),
-  COMBO(rus_yo_combo, KC_GRV)
+  COMBO(rus_yo_combo, KC_GRV),
+  COMBO(qwerty_layer_combo, TG(_QWERTY))
 };
 
 // Create key overrides
@@ -357,6 +420,10 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     lang_check_and_set(_RUS);
     break;
 
+  case _QWERTY:
+    rgblight_sethsv_noeeprom(QWERTY_HSV_COLOR);
+    break;
+
   default:
     rgblight_sethsv_noeeprom(ENG_HSV_COLOR);
     break;
@@ -385,13 +452,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
       }
     case (LT(0, KC_LGUI)): // Implement LGUI_T(TG(1))
-      if (record->tap.count && record->event.pressed) {
-        layer_invert(1); // When tap toggle 1 level
+      if (record->tap.count && record->event.pressed && !IS_LAYER_ON(_FN)) {
+        layer_invert(_RUS); // When tap toggle 1 level
       }
-      else if (!record->tap.count && record->event.pressed) {
+      else if (record->event.pressed) {
         register_code(KC_LGUI);
       }
-      else if (!record->tap.count && !record->event.pressed) {
+      else if (!record->event.pressed) {
         unregister_code(KC_LGUI);
       }
       return false;

@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SPLIT_USB_DETECT //Без этого не работает
 #define SPLIT_WATCHDOG_ENABLE
 
-#define COMBO_COUNT 2
+#define COMBO_COUNT 3
 
 #define SPLIT_LAYER_STATE_ENABLE
 #define SPLIT_TRANSACTION_IDS_USER POWER_STATE_SYNC
