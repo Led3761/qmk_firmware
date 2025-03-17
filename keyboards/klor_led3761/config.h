@@ -57,30 +57,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #    define OLED_FONT_H  "./lib/glcdfont.c"
 #endif
 
-
-// ┌─────────────────────────────────────────────────┐
-// │ r g b   l e d s                                 │
-// └─────────────────────────────────────────────────┘
-
-#define WS2812_DI_PIN D3
-#define RGBLED_NUM 42
-#define RGBLED_SPLIT { 21, 21 }
-#define RGB_MATRIX_LED_COUNT RGBLED_NUM
-
-#ifdef RGB_MATRIX_ENABLE
-#    define SPLIT_TRANSPORT_MIRROR
-#    define DRIVER_LED_TOTAL 42 // Number of LEDs
-#    define RGB_MATRIX_SPLIT { 21, 21 }
-#    define RGB_MATRIX_MAXIMUM_BRIGHTNESS 180
-#    define RGB_MATRIX_STARTUP_HUE 35
-#    define RGB_MATRIX_STARTUP_VAL RGB_MATRIX_MAXIMUM_BRIGHTNESS
-#    define RGB_DISABLE_WHEN_USB_SUSPENDED
-#    define RGB_MATRIX_KEYPRESSES
-#endif
-
 // ┌─────────────────────────────────────────────────┐
 // │ a u d i o                                       │
 // └─────────────────────────────────────────────────┘
+#define AUDIO_PIN B5
+#define AUDIO_DAC_SAMPLE_MAX 4095U
+#define AUDIO_POWER_CONTROL_PIN_ON_STATE 1
+
+#define AUDIO_VOICES
+#define AUDIO_VOICE_DEFAULT butts_fader
 
 #define AUDIO_PWM_DRIVER PWMD4
 #define AUDIO_PWM_CHANNEL RP2040_PWM_CHANNEL_B

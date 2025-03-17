@@ -1,30 +1,9 @@
-/*
-
-                                        █         █    █            ▄▄▄▀▀▀▀▀▀▄▄▄        █▀▀▀▀▀▀▀▀▀▀█
-                                        █        █     █          ▄▀            ▀▄      █          █
-                                        █       █      █        ▄▀                ▀▄    █          █
-                                        █      █       █        █                  █    █          █
-                                        █     █        █       █                    █   █          █
-                                        █    █         █       █                    █   █▄▄▄▄▄▄▄▄▄▄█
-                                        █   █ █        █       █                    █   █      █
-                                        █  █   █       █        █                  █    █       █
-                                        █ █     █      █        ▀▄                ▄▀    █        █
-                                        ██       █     █          ▀▄            ▄▀      █         █
-                                        █         █    █▄▄▄▄▄▄▄▄    ▀▀▀▄▄▄▄▄▄▀▀▀        █          █
-
-                                        ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-                                        ┌─┐┌─╴╷┌──┬─
-                                        │ ┐├─╴│└─┐│
-                                        └─┘└─╴╵╶─┘╵
-*/
 #include QMK_KEYBOARD_H
+
 #include <stdio.h>
 #include <string.h>
-#include "klor_led3761.h"
 
-#ifdef HAPTIC_ENABLE
-#include "drivers/haptic/DRV2605L.h"
-#endif //HAPTIC ENABLE
+#include "klor_led3761.h"
 
 
 // ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -64,9 +43,11 @@ typedef enum {
 #ifdef AUDIO_ENABLE
   #define WINXP_SOUND W__NOTE(_DS6), Q__NOTE(_DS5), H__NOTE(_AS5), H__NOTE(_GS5), H__NOTE(_DS5), H__NOTE(_DS6), H__NOTE(_AS5)
   #define MAC_SOUND S__NOTE(_CS5), B__NOTE(_C5)
+  #define KLOR_SOUND W__NOTE(_DS0), W__NOTE(_DS1), H__NOTE(_DS2), H__NOTE(_DS3), Q__NOTE(_DS4), Q__NOTE(_DS5), E__NOTE(_DS6), E__NOTE(_DS7), S__NOTE(_DS8), Q__NOTE(_GS0)
  
   float winxp_song[][2] = SONG(WINXP_SOUND);
   float mac_song[][2] = SONG(MAC_SOUND);
+  float klor_song[][2] = SONG(KLOR_SOUND);
 #endif // AUDIO_ENABLE
 
 // ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -100,15 +81,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 // ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-// │ H A P T I C   F E E D B A C K                                                                                                              │
+// │ POST INIT                                                                                                              │
 // └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 // ▝▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▘
 
 void keyboard_post_init_user(void) {
-  #if RGB_MATRIX_ENABLE
-    rgblight_enable_noeeprom();
-    rgblight_sethsv_noeeprom(35, 255, 255); // set default RGB color to yellow
-  #endif //RGB_MATRIX_ENABLE
+    //TODO Maybe add some code
+    rgb_matrix_sethsv_noeeprom(35, 255, 255);
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_REACTIVE_SIMPLE);
+
+#ifdef AUDIO_ENABLE
+    PLAY_SONG(klor_song);
+#endif
 }
 
 
@@ -162,6 +146,8 @@ bool oled_task_kb(void) {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
         oled_write_raw_P(klor_face, sizeof(klor_face));
+
+        return false;
 }
 #endif // OLED_ENABLE
 
@@ -180,44 +166,21 @@ bool oled_task_kb(void) {
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (index == 0) { /* First encoder */
         if (clockwise) {
-            tap_code_delay(KC_VOLU, 10);
+            // tap_code16(QK_AUDIO_VOICE_NEXT);
+            rgb_matrix_increase_hue_noeeprom();
+            // tap_code_delay(KC_VOLU, 10);
         } else {
-            tap_code_delay(KC_VOLD, 10);
+            rgb_matrix_decrease_hue_noeeprom();
+            // tap_code_delay(KC_VOLD, 10);
         }
     } else if (index == 1) { /* Second encoder */
         if (clockwise) {
-            rgb_matrix_increase_hue();
+            rgb_matrix_increase_val_noeeprom();
         } else {
-            rgb_matrix_decrease_hue();
+            rgb_matrix_decrease_val_noeeprom();
         }
     }
     return false;
 }
 
 #endif // ENCODER_ENABLE
-
-
-
-
-/*
-
-                                                       ▐█    ▟▛ ▐█     ▄▆▀▀▀▀▀▀▆▄  ▐█▀▀▀▀▀█▌
-                                                       ▐█   ▟▛  ▐█    ▟▛        ▜▙ ▐█     █▌
-                                                       ▐█  ▟▛   ▐█   ▐█          █▋▐█     █▌
-                                                       ▐█ ▟█▙   ▐█   ▐█          █▋▐█▀▀▜█▀▀▘
-                                                       ▐█▟▛ ▜▙  ▐█    ▜▙        ▟▛ ▐█   ▜▙
-                                                       ▐█▛   ▜▙ ▐█▄▄▄▄ ▀▜▆▄▄▄▄▆▛▀  ▐█    ▜▙
-
-                                                                 ▄██████████████▄
-                                                                 ████████████████
-                                                            ▄██████▀  ▀████▀  ▀██████▄
-                                                            ███████▄  ▄████▄  ▄███████
-                                                            ███████████▀▀▀▀███████████
-                                                            ▀█████████▀ ▄▄ ▀█████████▀
-                                                                 ████▀ ▄██▄ ▀████
-                                                                 ████▄▄████▄▄████
-
-*/
-
-
-

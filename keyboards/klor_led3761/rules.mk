@@ -5,23 +5,25 @@ MCU = RP2040
 BOOTLOADER = rp2040
 
 # Build Options
-#   change yes to no to disable
+# Change yes to no to disable
 #
-#SPLIT_KEYBOARD = yes
-SWAP_HANDS_ENABLE = yes
+SWAP_HANDS_ENABLE = no
 
-#OLED_ENABLE = yes
+#OLED
+OLED_ENABLE = yes
 OLED_DRIVER = ssd1306
+
+#ENCODER
 ENCODER_ENABLE = yes
 
 #HAPTIC FEEDBACK
 HAPTIC_DRIVER = drv2605l
+HAPTIC_ENABLE = no
 
 #PER KEY RGB
 BACKLIGHT_ENABLE = no       # Enable keyboard backlight functionality
 RGBLIGHT_ENABLE = no        # Enable keyboard RGB underglow
-RGB_MATRIX_ENABLE = no      # Enable keyboard RGB matrix (do not use together with RGBLIGHT_ENABLE)
-#RGB_MATRIX_DRIVER = ws2812  # RGB matrix driver support
+RGB_MATRIX_ENABLE = yes      # Enable keyboard RGB matrix (do not use together with RGBLIGHT_ENABLE)
 RGB_MATRIX_SUPPORTED = yes
 
 #SPACE SAVING
@@ -33,8 +35,11 @@ MOUSEKEY_ENABLE = no
 SPACE_CADET_ENABLE = no
 GRAVE_ESC_ENABLE = no
 MAGIC_ENABLE = no
+COMBO_ENABLE = no
+KEY_OVERRIDE_ENABLE = no
 
 POINTING_DEVICE_DRIVER = paw3204
+POINTING_DEVICE_ENABLE = no
 
 EXTRAFLAGS += -Wno-error
 
@@ -44,11 +49,8 @@ ALLOW_WARNINGS = yes
 # LTO must be disabled for RP2040 builds
 LTO_ENABLE = no
 
-# PIO serial/WS2812 drivers must be used on RP2040
-SPLIT_KEYBOARD = yes
-
 SERIAL_DRIVER = vendor
-WS2812_DRIVER = vendor
+# WS2812_DRIVER = vendor
 
 # CONVERTER - if you use a listed MCU comment the first line and uncomment the appropiate line
 #CONVERT_TO = promicro_rp2040
